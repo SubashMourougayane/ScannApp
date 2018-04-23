@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -20,6 +21,10 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.Task;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class Login extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
 
     private static final String TAG = Login.class.getSimpleName();
@@ -30,6 +35,9 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
     private SignInButton btnSignIn;
     private Button btnSignOut, btnRevokeAccess;
+
+    private ScheduledExecutorService scheduleTaskExecutor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +52,28 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         // Build a GoogleSignInClient with the options specified by gso.
         mGoogleApiClient = GoogleSignIn.getClient(this, gso);
 
+        //trigger code for 24hrs
 
+        scheduleTaskExecutor = Executors.newScheduledThreadPool(5);
 
+        //Schedule a task to run every 5 seconds (or however long you want)
+        scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
 
+                //6 AM code indert here
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(Login.this, "Its been 5 seconds", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
+        }, 0,24, TimeUnit.HOURS); // or .MINUTES, .HOURS etc.
+
+        //trigger code ends
 
         btnSignIn = (SignInButton) findViewById(R.id.btn_sign_in);
         btnSignIn.setOnClickListener(new View.OnClickListener() {
