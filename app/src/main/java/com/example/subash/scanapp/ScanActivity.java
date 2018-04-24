@@ -2,8 +2,11 @@ package com.example.subash.scanapp;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Environment;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +26,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
@@ -36,13 +43,18 @@ public class ScanActivity extends Activity implements ZXingScannerView.ResultHan
     File filepath;
     FileWriter writer;
     int length = 0;
+    AlertDialog alertDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan);
+        System.out.println("IN SCANNING ACTIVITY");
         ViewGroup contentFrame = (ViewGroup) findViewById(R.id.content_frame);
         mScannerView = new ZXingScannerView(this);
         contentFrame.addView(mScannerView);
+         alertDialog = new AlertDialog.Builder(ScanActivity.this).create();
+
+
     }
 
     @Override
@@ -65,25 +77,65 @@ public class ScanActivity extends Activity implements ZXingScannerView.ResultHan
         Log.v(TAG, rawResult.getBarcodeFormat().toString()); // Prints the scan format (qrcode, pdf417 etc.)
         scanned_text = rawResult.getText();
         System.out.println("RESULT IS "+scanned_text);
+        C_name = scanned_text.split(",")[0];
+        P_name = scanned_text.split(",")[1];
+        fassai = scanned_text.split(",")[2];
+        M_date = scanned_text.split(",")[3];
+        E_date = scanned_text.split(",")[4];
+
+        String e_date = E_date.split("/")[0];
+        String e_month = E_date.split("/")[1];
+        String e_year = E_date.split("/")[2];
+
+        Date c = Calendar.getInstance().getTime();
+        System.out.println("Current time => " + c);
+
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        String formattedDate = df.format(c);
+        System.out.println("Today date is "+formattedDate);
+
+        String c_date = formattedDate.split("/")[0];
+        String c_month = formattedDate.split("/")[1];
+        String c_year = formattedDate.split("/")[2];
+
+        String AlertString = "Product Quality : GOOD";
+        Date Edate,Cdate;
+
+        try {
+            if (df.parse(formattedDate).before(df.parse(E_date))){
+                System.out.println("inum expiry aagala");
+            }
+            else if(df.parse(formattedDate).equals(df.parse(E_date))){
+                Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                vibe.vibrate(500);
+                AlertString = "Alert! Product About to Expire Today!:  ";
+            }
+            else if(df.parse(formattedDate).after(df.parse(E_date))){
+                Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                vibe.vibrate(1000);
+                AlertString = "Alert! Product Aldready Expired!";
+
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+
         mScannerView.stopCamera();
-        AlertDialog alertDialog = new AlertDialog.Builder(ScanActivity.this).create();
-        alertDialog.setTitle("Alert");
-        alertDialog.setMessage(scanned_text);
+        alertDialog.setTitle(AlertString);
+        alertDialog.setMessage("Company Name: "+C_name+"\nProduct Name: "+P_name+"\n"+"FASSAI No.: "+fassai +"\n"+"ManufacturingDate: "+M_date+"\nExpiry Date: "+E_date);
+
+
+
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Add Product",
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mScannerView.startCamera();
                         //add product to json
-
-                        C_name = scanned_text.split(",")[0];
-                        P_name = scanned_text.split(",")[1];
-                        fassai = scanned_text.split(",")[2];
-                        M_date = scanned_text.split(",")[3];
-                        E_date = scanned_text.split(",")[4];
-
-
-
                         JSONObject JO = new JSONObject();
 
                         JSONArray JA = new JSONArray();

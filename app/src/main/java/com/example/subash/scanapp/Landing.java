@@ -13,7 +13,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class Landing extends AppCompatActivity {
     File root;
@@ -30,7 +33,14 @@ public class Landing extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_landing);
-
+        scan = (Button) findViewById(R.id.scan);
+        scan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("boww thaka boww");
+                startActivity(new Intent(getApplicationContext(), ScanActivity.class));
+            }
+        });
         root = new File(Environment.getExternalStorageDirectory(), "ScanApp");
         File file = new File(root, "scan.txt");
 
@@ -45,9 +55,7 @@ public class Landing extends AppCompatActivity {
                 text.append('\n');
             }
             br.close();
-            System.out.println("qwerqwer" + text);
             JSONObject JSON_Obj = new JSONObject(text.toString());
-            System.out.println("asdfasdf " + JSON_Obj.length());
             length = JSON_Obj.length();
 
             for (int i=1;i<=length;i++){
@@ -58,22 +66,15 @@ public class Landing extends AppCompatActivity {
                 fassai = scanned_text.split(",")[2];
                 M_date = scanned_text.split(",")[3];
                 E_date = scanned_text.split(",")[4];
-
+                //adding list da hhs
                 ProdName.add(P_name);
                 CompName.add(C_name);
                 ExpDate.add(E_date);
-
-
             }
 
-
-            scan = (Button) findViewById(R.id.scan);
-            scan.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(getApplicationContext(), ScanActivity.class));
-                }
-            });
+            System.out.println("hhs LISTS are "+ ProdName);
+            System.out.println("hhs LISTS are "+ CompName);
+            System.out.println("hhs LISTS are "+ ExpDate);
 
 
         } catch (Exception e) {
